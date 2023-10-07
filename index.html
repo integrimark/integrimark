@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Watermarker</title>
+    <script src="https://unpkg.com/pdf-lib@1.16.0/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+    <input type="file" id="pdfInput">
+    <input type="text" id="watermarkInput" placeholder="Enter watermark text">
+    <button onclick="addWatermark()">Add Watermark</button>
+    <a id="downloadLink" style="display: none;">Download Watermarked PDF</a>
+
+    <script>
+        async function addWatermark() {
+            const pdfFile = document.getElementById('pdfInput').files[0];
+            const watermarkText = document.getElementById('watermarkInput').value;
+
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const pdfBytes = new Uint8Array(reader.result);
+
+                const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+                const pages = pdfDoc.getPages();
+                const { width, height } = pages[0].getSize();
+
+                for (const page of pages) {
+                    page.drawText(watermarkText, {
+                        x: width / 4,
+                        y: height / 2,
+                        size: 50,
+                        opacity: 0.5,
+                    });
+                }
+
+                const watermarkedBytes = await pdfDoc.save();
+                const blob = new Blob([watermarkedBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.href = url;
+                downloadLink.download = 'watermarked.pdf';
+                downloadLink.style.display = 'block';
+            };
+            reader.readAsArrayBuffer(pdfFile);
+        }
+    </script>
+</body>
+</html>

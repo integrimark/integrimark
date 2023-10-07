@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encrypt PDF</title>
+</head>
+<body>
+    <input type="file" id="pdfInput" accept=".pdf">
+    <input type="password" id="passwordInput" placeholder="Enter Password">
+    <button onclick="encryptPDF()">Encrypt & Download</button>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.js"></script>
+    <script>
+        async function encryptPDF() {
+            const pdfInput = document.getElementById('pdfInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const password = passwordInput.value;
+
+            if (!pdfInput.files[0] || !password) {
+                alert('Please select a PDF and enter a password.');
+                return;
+            }
+
+            const pdfBuffer = await pdfInput.files[0].arrayBuffer();
+
+            // Encrypt the PDF buffer
+            const encrypted = CryptoJS.AES.encrypt(
+                CryptoJS.lib.WordArray.create(pdfBuffer), 
+                password
+            ).toString();
+
+            // Convert Base64-encoded encrypted string to Uint8Array
+            const encryptedBinary = base64ToUint8Array(encrypted);
+
+            // Convert encrypted Uint8Array to Blob for download
+            const blob = new Blob([encryptedBinary], { type: 'application/octet-stream' });
+
+            // Create a download link and trigger download
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'encrypted.pdf';
+            link.click();
+        }
+
+        function base64ToUint8Array(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes;
+        }
+
+    </script>
+</body>
+</html>

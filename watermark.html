@@ -123,6 +123,17 @@
             return text.length * avgCharWidth * scale;
         }
 
+        // Function to generate random text
+        function generateRandomText(length) {
+            const syllables = ['ba', 'la', 'na', 'mo', 'to', 'po', 'ki', 'ri',
+                'mi', 'fu', 'lu', 'du', 'su', 'pu', 'ka', 'ta', 'pa', 'bo', ' '];
+            let text = '';
+            for (let i = 0; i < length; i++) {
+                text += syllables[Math.floor(Math.random() * syllables.length)];
+            }
+            return text;
+        }
+
         async function addWatermark() {
             let pdfBytes;
             const pdfFile = document.getElementById('pdfInput').files[0];
@@ -209,6 +220,36 @@
                     opacity: 0.5,
                 });
             }
+            const useProtection = true;
+            // ****************************************
+            // Invisible text for copy-paste protection
+            if (useProtection) {
+                const invisibleText = generateRandomText(5000); // Generate a long string
+                const textSize = 1; // Very small font size
+
+                for (const page of pages) {
+                    const { width, height } = page.getSize();
+                    const charsPerLine = Math.floor(width / textSize); // Estimate characters per line based on page width and font size
+
+                    // Split the text into lines
+                    const lines = [];
+                    for (let i = 0; i < invisibleText.length; i += charsPerLine) {
+                        lines.push(invisibleText.slice(i, i + charsPerLine));
+                    }
+
+                    // Draw each line on the page
+                    for (let i = 0; i < lines.length; i++) {
+                        page.drawText(lines[i], {
+                            x: 0,
+                            y: height - (i * textSize * 1.5), // Position each line from top to bottom with a little spacing
+                            size: textSize,
+                            color: PDFLib.rgb(1, 1, 1), // White color
+                            opacity: 0, // Fully transparent
+                        });
+                    }
+                }
+            }
+            // ****************************************
 
             const watermarkedBytes = await pdfDoc.save();
             const blob = new Blob([watermarkedBytes], { type: 'application/pdf' });

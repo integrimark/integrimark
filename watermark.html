@@ -165,32 +165,41 @@
             const pages = pdfDoc.getPages();
 
             const watermarkText = document.getElementById('watermarkInput').value;
-            const watermarkHeader = "Personalized Download";
-            const watermarkFooter = `This document was prepared for ${watermarkText}. Disseminating this document, or viewing it as a student, is a course violation.`;
-            const watermarkCenter = watermarkText;
+            const watermarkColor = [0.7, 1, 0.7]; // Light green pastel color in array format
+            const watermarkFooter = `This document has been exclusively prepared for ${watermarkText}. For any other person to view this document is a course violation.`;
+            
 
             for (const page of pages) {
                 const { width, height } = page.getSize();
-                const textSize = 30;
-                const textWidthHeader = estimateTextWidth(watermarkHeader, 10);
-                const textWidthWatermark = estimateTextWidth(watermarkCenter, textSize);
+                const textSize = 20;
+                const textWidth = estimateTextWidth(watermarkText, textSize);
                 const textHeight = textSize; // Approximation
+                
+                // Tiling the watermark text across the page
+                let shift = false; // To determine if we need to shift the line
+                const shiftAmount = textWidth / 2; // Amount to shift every other line
 
-                // Centered watermark
-                page.drawText(watermarkCenter, {
-                    x: (width - textWidthWatermark) / 2,
-                    y: (height - textHeight) / 2,
-                    size: textSize,
-                    opacity: 0.25,
-                });
+                for (let y = height; y > 0; y -= textHeight * 1.5) {
+                    let startX = 0; // Starting position for each line
 
-                // Top watermark
-                page.drawText(watermarkHeader, {
-                    x: (width - textWidthHeader) / 2,
-                    y: height - 30,
-                    size: 10,
-                    opacity: 0.5,
-                });
+                    // If shift is true, adjust the starting position
+                    if (shift) {
+                        startX = -shiftAmount;
+                    }
+
+                    for (let x = startX; x < width; x += textWidth) {
+                        page.drawText(watermarkText, {
+                            x: x,
+                            y: y,
+                            size: textSize,
+                            color: new PDFLib.rgb(watermarkColor[0], watermarkColor[1], watermarkColor[2]),
+                            opacity: 0.25,
+                        });
+                    }
+
+                    // Toggle the shift for the next line
+                    shift = !shift;
+                }
 
                 // Bottom watermark
                 page.drawText(watermarkFooter, {

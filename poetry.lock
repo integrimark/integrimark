@@ -136,6 +136,23 @@ files = [
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
+name = "click-help-colors"
+version = "0.9.4"
+description = "Colorization of help messages in Click"
+optional = false
+python-versions = "*"
+files = [
+    {file = "click-help-colors-0.9.4.tar.gz", hash = "sha256:f4cabe52cf550299b8888f4f2ee4c5f359ac27e33bcfe4d61db47785a5cc936c"},
+    {file = "click_help_colors-0.9.4-py3-none-any.whl", hash = "sha256:b33c5803eeaeb084393b1ab5899dc5476c7196b87a18713045afe76f840b42db"},
+]
+
+[package.dependencies]
+click = ">=7.0,<9"
+
+[package.extras]
+dev = ["mypy", "pytest"]
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
@@ -424,4 +441,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "2e2f15c71bb6f73401ea6b76c4377e22b233da77bed7066ae49bdecab60ef118"
+content-hash = "25878dec9bde5254ec97887500619c93de795c18b7e2ba162667b7cfb7a5966e"

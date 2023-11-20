@@ -8,10 +8,15 @@ import urllib.parse
 import click
 import dotenv
 import loguru
+from click_help_colors import HelpColorsGroup, HelpColorsCommand
 from xkcdpass import xkcd_password as xp
 
 
 dotenv.load_dotenv()
+
+# Configure loguru for colored output
+loguru.logger.remove()
+loguru.logger.add(lambda msg: click.echo(msg, nl=False), colorize=True)
 
 
 def get_integrimark_template(base_url=None):
@@ -32,24 +37,32 @@ def get_integrimark_template(base_url=None):
         raise
 
 
-@click.group()
+@click.group(
+    cls=HelpColorsGroup, help_headers_color="yellow", help_options_color="green"
+)
 def cli():
-    """Integrimark command line tool."""
+    """
+    INTEGRIMARK, document watermarking distribution tool
+    https://github.com/jlumbroso/integrimark
+
+    Distribute watermarked documents from GitHub pages using an encrypted bundle.
+    Built with love by Jérémie Lumbroso <lumbroso@seas.upenn.edu>, feedback welcome.
+    """
     pass
 
 
-@cli.command()
+@cli.command(cls=HelpColorsCommand, help_options_color="bright_green")
 @click.argument("files", nargs=-1, type=click.Path(exists=True))
 @click.option(
     "-o",
-    "--output_Directory",
+    "--output_directory",
     default=os.getcwd(),
     type=click.Path(exists=True),
     help="Directory where _bundle folder will be created. Defaults to the current working directory.",
 )
 @click.option(
     "-u",
-    "--base_URL",
+    "--base_url",
     default=None,
     type=click.STRING,
     help="Base URL at which the Integrimark vault will be hosted.",
@@ -134,10 +147,10 @@ def create(files, output_directory, base_url):
             f.write("_bundle/passwords.json")
             f.write("passwords.json")
 
-    click.echo("Encryption complete!")
+    click.echo(click.style("Encryption complete!", fg="green"))
 
 
-@cli.command()
+@cli.command(cls=HelpColorsCommand, help_options_color="bright_green")
 @click.argument("bundle_path", type=click.Path(exists=True))
 @click.argument("email_address", type=click.STRING)
 @click.option(

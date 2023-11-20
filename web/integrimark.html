@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download protected by IntegriMark</title>
+    <script src="https://unpkg.com/pdf-lib@1.16.0/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <link rel="stylesheet" href="integrimark.css"/>
+
+    <!--Configuration file for IntegriMark files-->
+    <script src="routing.js"></script>
+</head>
+<body>
+    <div class="frame">
+        <h1>Download protected by IntegriMark</h1>
+        <p id="errorMessage" style="color: red; display: none;">You are not authorized to access this page.</p>
+        <form id="pdfForm" style="display: none;">
+            <input type="hidden" id="fileUrl" value="">
+        </form>
+        <p>Currently preparing a protected version of the file <strong id="filenameDisplay"></strong>...</p>
+        <a id="downloadLink" style="display: none;">Click here if the download doesn't start automatically</a>
+    </div>
+    <footer>
+        Protected by IntegriMark, made with <span style="color: #e25555;">&hearts;</span>
+        by <a href="https://directory.seas.upenn.edu/jeremie-o-lumbroso/">Jérémie Lumbroso, Penn CIS</a>.
+    </footer>
+    <script src="integrimark.js"></script>
+</body>
+</html>

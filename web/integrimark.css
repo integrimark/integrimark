@@ -1,0 +1,41 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e6f9e6; /* Pastel green background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.frame {
+    background-color: #b2e0b2; /* Darker pastel green for the frame */
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    max-height: 400px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+footer {
+    font-size: 10px;
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+}
+
+a {
+    color: #007700; /* Complementary color for links */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

@@ -26,6 +26,14 @@ def get_integrimark_template(base_url=None):
             package_or_requirement=__name__, resource_name="integrimark.pack.html"
         )
 
+        if not os.path.exists(filename):
+            loguru.logger.error(
+                "Integrimark template not found. Please reinstall integrimark. (File not found: {}.)".format(
+                    filename
+                )
+            )
+            raise FileNotFoundError
+
         with open(filename, "r") as f:
             content = f.read()
             if base_url:
@@ -141,11 +149,11 @@ def create(files, output_directory, base_url):
         if "_bundle/passwords.json" not in lines or "passwords.json" not in lines:
             with open(gitignore_path, "a") as f:
                 f.write("\n_bundle/passwords.json")
-                f.write("\n/passwords.json")
+                f.write("\npasswords.json")
     else:
         with open(gitignore_path, "w") as f:
-            f.write("_bundle/passwords.json")
-            f.write("passwords.json")
+            f.write("\n_bundle/passwords.json")
+            f.write("\npasswords.json")
 
     click.echo(click.style("Encryption complete!", fg="green"))
 

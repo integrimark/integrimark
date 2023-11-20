@@ -77,15 +77,24 @@ def cli():
     help="Base URL at which the Integrimark vault will be hosted.",
 )
 @click.option(
+    "-p",
+    "--passwords",
+    default=None,
+    type=click.STRING,
+    help="Path to the `passwords.json` file of a previous call to create.",
+)
+@click.option(
     "--refresh",
     is_flag=True,
     default=False,
     help="Generate new passwords for all files, even if they exist in the _bundle.",
 )
-def create(files, output_directory, base_url, refresh):
+def create(files, output_directory, base_url, passwords, refresh):
     """Encrypts provided PDF files and saves them in the _bundle directory."""
     bundle_path = os.path.join(output_directory, "_bundle")
-    password_path = os.path.join(bundle_path, "passwords.json")
+    password_path = (
+        os.path.join(bundle_path, "passwords.json") if passwords is None else passwords
+    )
 
     if not os.path.exists(bundle_path):
         os.makedirs(bundle_path)

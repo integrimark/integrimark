@@ -5,7 +5,7 @@ include = ["integrimark.pack.html"]
 license = "LPGLv3"
 name = "integrimark"
 readme = "README.md"
-version = "0.1.0"
+version = "0.1.1"
 
 [tool.poetry.dependencies]
 click = "^8.1.7"

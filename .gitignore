@@ -1,5 +1,6 @@
 # cached integrimark pack
 integrimark/integrimark.pack.html
+*.csv
 
 # macOS metadata
 .DS_Store

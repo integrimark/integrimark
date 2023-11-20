@@ -1,4 +1,6 @@
 async function main() {
+    const integrimarkDebug = false;
+
     let canvas = document.createElement("canvas");
     let context = canvas.getContext("2d");
 
@@ -40,128 +42,133 @@ async function main() {
     }
 
     async function processPDF(pdfBytes, password, email, targetFilename) {
-        let decryptedBytes = pdfBytes;
+        try {
+            let decryptedBytes = pdfBytes;
 
-        if (password) {
-            // Decrypt the PDF buffer
-            const decrypted = CryptoJS.AES.decrypt(CryptoJS.lib.WordArray.create(pdfBytes).toString(CryptoJS.enc.Base64), password);
-            decryptedBytes = new Uint8Array(decrypted.sigBytes);
-            for (let i = 0; i < decrypted.sigBytes; i++) {
-                decryptedBytes[i] = decrypted.words[i >>> 2] >>> (24 - (i % 4) * 8) & 0xff;
-            }
-        }
-
-        const pdfDoc = await PDFLib.PDFDocument.load(decryptedBytes);
-        const pages = pdfDoc.getPages();
-
-        // Get the current date and time in the format YYYY-MM-DD@HH:MM
-        const currentDate = new Date();
-        const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}@${String(currentDate.getHours()).padStart(2, '0')}:${String(currentDate.getMinutes()).padStart(2, '0')}`;
-
-        // Watermark text (zero-char to make address unclickable)
-        const watermarkText = email.replace("@", "[at]");
-        const watermarkColor = [0.7, 1, 0.7]; // Light green pastel color in array format
-        const watermarkFooter = `This document has been exclusively prepared for ${email} on ${formattedDate}. For any other person to view this document is a course violation.`;
-
-        const textSize = 20;
-        const textWidth = estimateTextWidth(watermarkText, textSize);
-        //const textHeight = estimateTextHeight(watermarkText, textSize);
-        const textHeight = textSize; //approximation
-
-        for (const page of pages) {
-            const { width, height } = page.getSize();
-            
-            // Tiling the watermark text across the page
-            let shift = false; // To determine if we need to shift the line
-            const shiftAmount = textWidth / 2; // Amount to shift every other line
-            let secondaryShift = 0;
-            let secondaryShiftAmount = 2;
-
-            for (let y = height; y > 0; y -= textHeight * 1.2) {
-                let startX = 0; // Starting position for each line
-                
-                startX += secondaryShift;
-
-                // If shift is true, adjust the starting position
-                if (shift) {
-                    startX = -shiftAmount;
-                    startX -= secondaryShift;
+            if (password) {
+                // Decrypt the PDF buffer
+                const decrypted = CryptoJS.AES.decrypt(CryptoJS.lib.WordArray.create(pdfBytes).toString(CryptoJS.enc.Base64), password);
+                decryptedBytes = new Uint8Array(decrypted.sigBytes);
+                for (let i = 0; i < decrypted.sigBytes; i++) {
+                    decryptedBytes[i] = decrypted.words[i >>> 2] >>> (24 - (i % 4) * 8) & 0xff;
                 }
-
-                for (let x = startX; x < width; x += textWidth) {
-                    page.drawText(watermarkText, {
-                        x: x,
-                        y: y,
-                        size: textSize,
-                        color: new PDFLib.rgb(watermarkColor[0], watermarkColor[1], watermarkColor[2]),
-                        opacity: 0.45,
-                    });
-                }
-
-                // Toggle the shift for the next line
-                shift = !shift;
-
-                // Secondary shift
-                secondaryShift +=  secondaryShiftAmount;
             }
 
-            // Bottom watermark
-            page.drawText(watermarkFooter, {
-                x: 10,
-                y: 14,
-                size: 8,
-                opacity: 0.5,
-            });
-        }
-        const useProtection = true;
-        // ****************************************
-        // Invisible text for copy-paste protection
-        if (useProtection) {
-            //const invisibleText = generateRandomText(5000); // Generate a long string
-            const textSize = 10; // Very small font size
-            const textHeight = textSize; // Estimation
-            
+            const pdfDoc = await PDFLib.PDFDocument.load(decryptedBytes);
+            const pages = pdfDoc.getPages();
+
+            // Get the current date and time in the format YYYY-MM-DD@HH:MM
+            const currentDate = new Date();
+            const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}@${String(currentDate.getHours()).padStart(2, '0')}:${String(currentDate.getMinutes()).padStart(2, '0')}`;
+
+            // Watermark text (zero-char to make address unclickable)
+            const watermarkText = email.replace("@", "[at]");
+            const watermarkColor = [0.7, 1, 0.7]; // Light green pastel color in array format
+            const watermarkFooter = `This document has been exclusively prepared for ${email} on ${formattedDate}. For any other person to view this document is a course violation.`;
+
+            const textSize = 20;
+            const textWidth = estimateTextWidth(watermarkText, textSize);
+            //const textHeight = estimateTextHeight(watermarkText, textSize);
+            const textHeight = textSize; //approximation
+
             for (const page of pages) {
                 const { width, height } = page.getSize();
+                
+                // Tiling the watermark text across the page
+                let shift = false; // To determine if we need to shift the line
+                const shiftAmount = textWidth / 2; // Amount to shift every other line
+                let secondaryShift = 0;
+                let secondaryShiftAmount = 2;
 
-                for (let y = height; y > 0; y -= textHeight * 0.15) {
+                for (let y = height; y > 0; y -= textHeight * 1.2) {
                     let startX = 0; // Starting position for each line
                     
-                    page.drawText(generateRandomText(400), {
-                        x: startX,
-                        y: y,
-                        size: textSize,
-                        color: PDFLib.rgb(1, 1, 1), // White color
-                        opacity: 0, // Fully transparent
-                    });
+                    startX += secondaryShift;
+
+                    // If shift is true, adjust the starting position
+                    if (shift) {
+                        startX = -shiftAmount;
+                        startX -= secondaryShift;
+                    }
+
+                    for (let x = startX; x < width; x += textWidth) {
+                        page.drawText(watermarkText, {
+                            x: x,
+                            y: y,
+                            size: textSize,
+                            color: new PDFLib.rgb(watermarkColor[0], watermarkColor[1], watermarkColor[2]),
+                            opacity: 0.45,
+                        });
+                    }
+
+                    // Toggle the shift for the next line
+                    shift = !shift;
+
+                    // Secondary shift
+                    secondaryShift +=  secondaryShiftAmount;
+                }
+
+                // Bottom watermark
+                page.drawText(watermarkFooter, {
+                    x: 10,
+                    y: 14,
+                    size: 8,
+                    opacity: 0.5,
+                });
+            }
+            const useProtection = true;
+            // ****************************************
+            // Invisible text for copy-paste protection
+            if (useProtection) {
+                //const invisibleText = generateRandomText(5000); // Generate a long string
+                const textSize = 10; // Very small font size
+                const textHeight = textSize; // Estimation
+                
+                for (const page of pages) {
+                    const { width, height } = page.getSize();
+
+                    for (let y = height; y > 0; y -= textHeight * 0.15) {
+                        let startX = 0; // Starting position for each line
+                        
+                        page.drawText(generateRandomText(400), {
+                            x: startX,
+                            y: y,
+                            size: textSize,
+                            color: PDFLib.rgb(1, 1, 1), // White color
+                            opacity: 0, // Fully transparent
+                        });
+                    }
                 }
             }
+            // ****************************************
+
+            // Extract basename and extension from the original filename
+            const basename = originalFilename.split('.').slice(0, -1).join('.');
+            const extension = originalFilename.split('.').pop();
+
+            // Construct the new filename
+            var newFilename = `${basename}-${email}.${extension}`;
+
+            // Override if the target filename is specified
+            if (targetFilename) {
+                const lastPathComponent = targetFilename.split('/').pop();
+                const targetBasename = lastPathComponent.split('.').slice(0, -1).join('.');
+                newFilename = `${targetBasename}-${email}.${extension}`;
+            }
+
+            const watermarkedBytes = await pdfDoc.save();
+            const blob = new Blob([watermarkedBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+
+            const downloadLink = document.getElementById('downloadLink');
+            downloadLink.href = url;
+            downloadLink.download = newFilename;  // Use the new filename here
+            downloadLink.style.display = 'block';
+            downloadLink.click();
         }
-        // ****************************************
-
-        // Extract basename and extension from the original filename
-        const basename = originalFilename.split('.').slice(0, -1).join('.');
-        const extension = originalFilename.split('.').pop();
-
-        // Construct the new filename
-        var newFilename = `${basename}-${email}.${extension}`;
-
-        // Override if the target filename is specified
-        if (targetFilename) {
-            const lastPathComponent = targetFilename.split('/').pop();
-            const targetBasename = lastPathComponent.split('.').slice(0, -1).join('.');
-            newFilename = `${targetBasename}-${email}.${extension}`;
+        catch (error) {
+            throw error;
         }
-
-        const watermarkedBytes = await pdfDoc.save();
-        const blob = new Blob([watermarkedBytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-
-        const downloadLink = document.getElementById('downloadLink');
-        downloadLink.href = url;
-        downloadLink.download = newFilename;  // Use the new filename here
-        downloadLink.style.display = 'block';
-        downloadLink.click();
     }
 
     function hashEmail(email) {
@@ -185,6 +192,17 @@ async function main() {
     if(!pdfUrl) {
         publicKey = removeFirstFolder(currentPath);
         pdfUrl = integrimarkRoutes[publicKey];
+        // check public key is at least one character long
+        if(!pdfUrl && publicKey.length > 1) {
+            publicKey = publicKey.substring(1);
+            pdfUrl = integrimarkRoutes[publicKey];
+        }
+    }
+    if(integrimarkDebug) {
+        console.log("currentPath: " + currentPath);
+        console.log("publicKey: " + publicKey);
+        console.log("pdfUrl: " + pdfUrl);
+        console.log("integrimarkBaseURL: " + integrimarkBaseURL);
     }
     
     // Make the path absolute if it is not already (this is to avoid being confused by the
@@ -207,6 +225,7 @@ async function main() {
     const key = urlParams.get('key');
 
     if (!email || !key) {
+        document.getElementById('errorMessage').textContent = 'Malformed URL.';
         document.getElementById('errorMessage').style.display = 'block';
         return;
     }
@@ -224,7 +243,17 @@ async function main() {
     // Update the filename display in the frame
     document.getElementById('filenameDisplay').textContent = targetFilename;
 
-    processPDF(pdfBytes, password, email, targetFilename);
+    // Process the PDF without error catching
+    //processPDF(pdfBytes, password, email, targetFilename);
+
+    // Process the PDF with error catching
+    try {
+        await processPDF(pdfBytes, password, email, targetFilename);
+    } catch (error) {
+        console.error("Error processing PDF:", error);
+        document.getElementById('errorMessage').textContent = 'Error processing the PDF. Please try again later or with new URL.';
+        document.getElementById('errorMessage').style.display = 'block';
+    }
 }
 
 main();

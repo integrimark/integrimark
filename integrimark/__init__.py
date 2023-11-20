@@ -1,5 +1,6 @@
 import integrimark.encryption
 
+import csv
 import os
 import json
 import pkg_resources
@@ -75,14 +76,28 @@ def cli():
     type=click.STRING,
     help="Base URL at which the Integrimark vault will be hosted.",
 )
-def create(files, output_directory, base_url):
+@click.option(
+    "--refresh",
+    is_flag=True,
+    default=False,
+    help="Generate new passwords for all files, even if they exist in the _bundle.",
+)
+def create(files, output_directory, base_url, refresh):
     """Encrypts provided PDF files and saves them in the _bundle directory."""
     bundle_path = os.path.join(output_directory, "_bundle")
+    password_path = os.path.join(bundle_path, "passwords.json")
 
     if not os.path.exists(bundle_path):
         os.makedirs(bundle_path)
 
-    passwords = {}
+    # Load existing passwords if available and --no-refresh is set
+    if not refresh and os.path.exists(password_path):
+        with open(password_path, "r") as f:
+            full_password_file = json.load(f)
+        passwords = full_password_file.get("passwords", {})
+    else:
+        passwords = {}
+
     routing = {}
 
     # load wordfiles
@@ -92,22 +107,24 @@ def create(files, output_directory, base_url):
     # Process files
     for file in files:
         base_name = os.path.basename(file)
-
         file_hash = integrimark.encryption.md5_hash_file(file)
-
         output_filename = "_{}.enc.pdf".format(file_hash)
         output_path = os.path.join(bundle_path, output_filename)
 
-        # Check if password is provided, if not generate one
-        password = xp.generate_xkcdpassword(wordlist, numwords=4)
-        passwords[output_filename] = password
-        loguru.logger.info(f"Generated password: {password}")
+        # Use existing password if available and --no-refresh is set
+        if output_filename in passwords and not refresh:
+            password = passwords[output_filename]
+            loguru.logger.info(f"Using existing password: {password}")
+        else:
+            password = xp.generate_xkcdpassword(wordlist, numwords=4)
+            passwords[output_filename] = password
+            loguru.logger.info(f"Generated password: {password}")
 
         integrimark.encryption.encrypt_pdf_file(
             input_file=file, password=password, output_file=output_path
         )
 
-        new_name = base_name.split(".")[0].upper()
+        new_name = base_name
         routing[new_name] = output_filename
 
     # Duplicate integrimark page
@@ -160,7 +177,7 @@ def create(files, output_directory, base_url):
 
 @cli.command(cls=HelpColorsCommand, help_options_color="bright_green")
 @click.argument("bundle_path", type=click.Path(exists=True))
-@click.argument("email_address", type=click.STRING)
+@click.argument("email_addresses", nargs=-1, type=click.STRING)
 @click.option(
     "-f",
     "--file_name",
@@ -168,8 +185,14 @@ def create(files, output_directory, base_url):
     type=click.STRING,
     help="Name of the file (e.g., 'HW1-SOLUTIONS'). Can be used multiple times for multiple files.",
 )
-def url(bundle_path, email_address, file_name):
-    """Generates URLs for the given email address and file names."""
+@click.option(
+    "-o",
+    "--csv-output",
+    type=click.Path(),
+    help="Optional: Output CSV file name for storing the URLs.",
+)
+def url(bundle_path, email_addresses, file_name, csv_output):
+    """Generates URLs for the given email addresses and file names."""
     password_file = os.path.join(bundle_path, "passwords.json")
 
     if not os.path.exists(password_file):
@@ -187,25 +210,37 @@ def url(bundle_path, email_address, file_name):
 
     file_names = file_name if file_name else routing.keys()
 
-    for name in file_names:
-        public_file_name = name + ".pdf"
-        encrypted_file_name = routing.get(name.upper())
-        if encrypted_file_name:
-            password = passwords.get(encrypted_file_name)
-            if password:
-                encrypted_url = integrimark.encryption.generate_url(
-                    email_address, password, base_url, public_file_name
-                )
-                click.echo(
-                    "URL of {} customized for {}: {}".format(
-                        name, email_address, encrypted_url
+    url_data = []
+    for email in email_addresses:
+        row = {"email": email}
+        for name in file_names:
+            encrypted_file_name = routing.get(name)
+            if encrypted_file_name:
+                password = passwords.get(encrypted_file_name)
+                if password:
+                    encrypted_url = integrimark.encryption.generate_url(
+                        email, password, base_url, name
                     )
-                )
-                loguru.logger.info(f"Generated URL for {name}")
+                    click.echo(
+                        "URL of {} customized for {}: {}".format(
+                            name, email, encrypted_url
+                        )
+                    )
+                    loguru.logger.info(f"Generated URL for {name}")
+                    row[name] = encrypted_url
+                else:
+                    loguru.logger.warning(f"Password not found for file {name}.")
             else:
-                loguru.logger.warning(f"Password not found for file {name}.")
-        else:
-            loguru.logger.warning(f"File name {name} not found in routing.")
+                loguru.logger.warning(f"File name {name} not found in routing.")
+        url_data.append(row)
+
+    if csv_output:
+        with open(csv_output, mode="w", newline="") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=["email"] + list(file_names))
+            writer.writeheader()
+            for row in url_data:
+                writer.writerow(row)
+            click.echo(click.style(f"URLs saved to {csv_output}", fg="green"))
 
 
 if __name__ == "__main__":

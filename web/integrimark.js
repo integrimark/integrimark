@@ -83,12 +83,12 @@ async function main() {
                 for (let y = height; y > 0; y -= textHeight * 1.2) {
                     let startX = 0; // Starting position for each line
                     
-                    startX += secondaryShift;
+                    startX -= secondaryShift;
 
                     // If shift is true, adjust the starting position
                     if (shift) {
                         startX = -shiftAmount;
-                        startX -= secondaryShift;
+                        startX += secondaryShift;
                     }
 
                     for (let x = startX; x < width; x += textWidth) {

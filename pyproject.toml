@@ -1,11 +1,11 @@
 [tool.poetry]
 authors = ["Jérémie Lumbroso <lumbroso@seas.upenn.edu>"]
 description = "IntegriMark is a system that protects digital PDF documents by watermarking them with user-specific details, ensuring traceability and discouraging unauthorized sharing."
-include = ["integrimark.pack.html"]
+include = ["integrimark/integrimark.pack.html"]
 license = "LPGLv3"
 name = "integrimark"
 readme = "README.md"
-version = "0.1.1"
+version = "0.1.2"
 
 [tool.poetry.dependencies]
 click = "^8.1.7"

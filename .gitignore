@@ -1,5 +1,8 @@
-# cached integrimark pack
+# cached integrimark pack (need to be generated fresh)
 integrimark/integrimark.pack.html
+integrimark/integrimark.solutions-email.jinja2.html
+
+# misc CSV files around
 *.csv
 
 # macOS metadata

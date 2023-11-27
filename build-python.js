@@ -1,6 +1,8 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 
+const htmlMailerInput = './web/integrimark.solutions-email.jinja2.html';
+const htmlMailerOutput = './integrimark/integrimark.solutions-email.jinja2.html';
 const integrimarkPackFilePath = './integrimark/integrimark.pack.html';
 
 function runCommand(command) {
@@ -11,6 +13,9 @@ function runCommand(command) {
         process.exit(1);
     }
 }
+
+console.log('Updating integrimark.solutions-email.jinja2.html');
+fs.copyFileSync(htmlMailerInput, htmlMailerOutput);
 
 console.log('Running build-integrimark-pack.js...');
 runCommand('node build-integrimark-pack.js');

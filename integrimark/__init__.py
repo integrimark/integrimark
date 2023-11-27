@@ -1,10 +1,12 @@
-import integrimark.encryption
-
 import csv
 import os
 import json
 import pkg_resources
 import urllib.parse
+import typing
+
+import integrimark.encryption
+import integrimark.mailing
 
 import click
 import dotenv
@@ -250,6 +252,102 @@ def url(bundle_path, email_addresses, file_name, csv_output):
             for row in url_data:
                 writer.writerow(row)
             click.echo(click.style(f"URLs saved to {csv_output}", fg="green"))
+
+
+# Click command for sending solution mailers
+@cli.command(cls=HelpColorsCommand, help_options_color="bright_green")
+@click.option("--sendgrid-api-key", type=str, help="SendGrid API Key.")
+@click.option("--smtp-server", type=str, help="SMTP server address.")
+@click.option("--smtp-port", type=int, default=587, help="SMTP server port.")
+@click.option("--smtp-username", type=str, help="SMTP username.")
+@click.option("--smtp-password", type=str, help="SMTP password.")
+@click.option("--from-email", type=str, required=True, help="From email address.")
+@click.option(
+    "--csv-input-file",
+    type=click.Path(exists=True),
+    help="Path to a CSV file to use as input, instead of a Google Spreadsheet.",
+)
+@click.option("--google-spreadsheet-id", type=str, help="Google Spreadsheet ID.")
+@click.option(
+    "--google-worksheet-index",
+    type=int,
+    default=0,
+    help="Worksheet index in the spreadsheet.",
+)
+@click.option(
+    "--email-column",
+    type=str,
+    required=True,
+    help="Column name or index for email addresses.",
+)
+@click.option(
+    "--files-column",
+    type=str,
+    help="Column name or index for files.",
+)
+@click.option(
+    "--passwords",
+    type=click.Path(exists=True),
+    required=True,
+    help="Path to the passwords.json file.",
+)
+@click.option(
+    "--template-file",
+    type=click.Path(exists=True),
+    help="Path to a custom email template file.",
+)
+@click.option(
+    "--email-status-file",
+    type=click.Path(),
+    default="email-status.json",
+    help="Path to the email status JSON file.",
+)
+@click.option(
+    "--no-send-mode",
+    is_flag=True,
+    default=False,
+    help="Flag to run in no-send mode.",
+)
+def mail(
+    sendgrid_api_key,
+    smtp_server,
+    smtp_port,
+    smtp_username,
+    smtp_password,
+    from_email,
+    csv_input_file,
+    google_spreadsheet_id,
+    google_worksheet_index,
+    email_column,
+    files_column,
+    passwords,
+    template_file,
+    email_status_file,
+    no_send_mode,
+):
+    """
+    Send solution mailers based on Google Spreadsheet data.
+    """
+    integrimark.mailing.send_solution_mailers(
+        csv_input_file=csv_input_file,
+        google_spreadsheet_id=google_spreadsheet_id,
+        google_worksheet_index=google_worksheet_index,
+        email_col=email_column,
+        files_col=files_column,
+        passwords_file=passwords,
+        from_email=from_email,
+        service_account_json_path=None,  # Assuming using environment variables for service account
+        sendgrid_api_key=sendgrid_api_key,
+        smtp_server=smtp_server,
+        smtp_port=smtp_port,
+        smtp_username=smtp_username,
+        smtp_password=smtp_password,
+        email_status_file=email_status_file,
+        template_file=template_file,
+        no_send_mode=no_send_mode,
+    )
+
+    click.echo("Solution mailers sent successfully.")
 
 
 if __name__ == "__main__":

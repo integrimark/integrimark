@@ -1,0 +1,105 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Solutions Request Confirmation{% if course_code %}: {{ course_code }}{% endif %}</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #333;
+      }
+
+      .integrimark-green {
+        color: #007700; /* IntegriMark green */
+        font-weight: bold;
+        font-size: 110%;
+      }
+
+      .highlight-background {
+        background-color: #e6f9e6; /* Light IntegriMark green background */
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+
+      ul {
+        padding-left: 20px;
+      }
+
+      a {
+        color: #007700;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      footer {
+        font-size: 12px;
+        color: #666;
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 1px solid #e6f9e6;
+      }
+
+      footer a {
+        color: #666;
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <p>{{ 'Dear ' + First if First else 'Hello'}},</p>
+
+    <p>
+      This is an automated email confirming the receipt of your request for solutions{% if course_name %} for {{ course_name }}{% endif %}. Below, you will find the links to the requested files. Please read the following reminders carefully.
+    </p>
+
+    <div class="highlight-background">
+      <p class="integrimark-green">Important Reminders:</p>
+      <ul>
+        <li>The solutions are provided for your personal academic use only.</li>
+        <li>Sharing, distributing, or posting these solutions publicly or privately is strictly prohibited.</li>
+        <li>If you encounter any issues with the solutions or have questions, feel free to reply to this email.</li>
+        <li>Links to the solutions may expire. If this happens, you can request new ones.</li>
+      </ul>
+    </div>
+
+    <p class="integrimark-green">Your Requested Solution Links:</p>
+    <ul>
+      {% for item in selected_solution_links %}
+        <li><a href="{{ item.href }}">{{ item.description }}</a></li>
+      {% endfor %}
+    </ul>
+
+    <p>
+      Please remember that adherence to the academic integrity policies{% if course_code %} of {{ course_code }}{% endif %} is essential.
+    </p>
+
+    <p>
+      If you have any further questions or need additional assistance, do not hesitate to get in touch.
+    </p>
+    {% if survey_link %}
+      <p>
+        Finally, please <a href="{{ survey_link }}">consider submitting feedback</a> (in the form of a rating and optional text) on your experience, to help improve this solution request system.
+      </p>
+    {% endif %}
+
+    <p>
+      Best wishes,<br />
+      {% if instructor_signature %}{{ instructor_signature }}<br />{% endif %}
+      {% if course_name and course_code %}{{ course_code }}, {{ course_name }}<br />{% endif %}
+      {% if institution %}{{ institution }}<br />{% endif %}
+    </p>
+    <footer>
+      Protected by IntegriMark, made with <span style="color: #e25555;">&hearts;</span>
+      by <a href="https://directory.seas.upenn.edu/jeremie-o-lumbroso/">Jérémie Lumbroso, Penn CIS</a>.
+    </footer>
+  </body>
+</html>

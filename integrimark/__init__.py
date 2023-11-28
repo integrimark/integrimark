@@ -256,7 +256,11 @@ def url(bundle_path, email_addresses, file_name, csv_output):
 
 # Click command for sending solution mailers
 @cli.command(cls=HelpColorsCommand, help_options_color="bright_green")
-@click.option("--sendgrid-api-key", type=str, help="SendGrid API Key.")
+@click.option(
+    "--sendgrid-api-key",
+    type=str,
+    help="SendGrid API Key (can also be provided as environment variable SENDGRID_API_KEY).",
+)
 @click.option("--smtp-server", type=str, help="SMTP server address.")
 @click.option("--smtp-port", type=int, default=587, help="SMTP server port.")
 @click.option("--smtp-username", type=str, help="SMTP username.")
@@ -275,6 +279,11 @@ def url(bundle_path, email_addresses, file_name, csv_output):
     help="Worksheet index in the spreadsheet.",
 )
 @click.option(
+    "--service-account-json",
+    type=click.Path(exists=True),
+    help="Google Spreadsheet API service account JSON file path (the contents of the file can also be provided as environment variable  SERVICE_ACCOUNT_JSON).",
+)
+@click.option(
     "--email-column",
     type=str,
     required=True,
@@ -288,8 +297,8 @@ def url(bundle_path, email_addresses, file_name, csv_output):
 @click.option(
     "--passwords",
     type=click.Path(exists=True),
-    required=True,
-    help="Path to the passwords.json file.",
+    default="passwords.json",
+    help="Path to the passwords.json file (by default, './passwords.json').",
 )
 @click.option(
     "--template-file",
@@ -300,7 +309,7 @@ def url(bundle_path, email_addresses, file_name, csv_output):
     "--email-status-file",
     type=click.Path(),
     default="email-status.json",
-    help="Path to the email status JSON file.",
+    help="Path to the email status JSON file (by default, './email-status.json').",
 )
 @click.option(
     "--no-send-mode",

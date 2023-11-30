@@ -14,7 +14,9 @@ This document outlines the mission of IntegriMark, the design rationale behind t
 
 2. **Friction, Responsibility, and Transparency:** The tool introduces friction in the leaking process, assigns responsibility by identifying potential leakers, and fosters transparency and community norms against leaking solutions. This approach is designed to deter students from sharing watermarked documents inappropriately.
 
-3. **Invisible Gobbledygook Layer:** To prevent copy-pasting from the document, IntegriMark introduces an invisible layer of nonsensical text over the document. This layer ensures that any attempt to copy text from the document results in copying meaningless text, further protecting the document's integrity.
+3. **Invisible Layer Against Copy-Pasting:** IntegriMark employs an invisible layer of randomly generated text over the document, preventing meaningful text from being copied and ensuring the document's integrity.
+
+4. **Automated, Zero-Cost Hosting and Distribution:** Utilizing GitHub Actions, IntegriMark automates the encryption, hosting, and distribution of documents on platforms like GitHub Pages, ensuring a secure, cost-effective, and labor-efficient solution.
 
 ### Moral Grounding:
 1. **Promoting Academic Integrity:** IntegriMark upholds the values of academic integrity by deterring the unauthorized sharing of educational materials, ensuring that assessments remain fair and valid.
@@ -25,4 +27,6 @@ This document outlines the mission of IntegriMark, the design rationale behind t
 
 4. **Building Community Norms:** The transparency and accountability fostered by IntegriMark encourage the development of community norms that value the protection of educational resources and discourage practices that undermine academic fairness.
 
-In summary, IntegriMark is not just a tool for securing documents; it's a solution aimed at addressing deeper educational challenges related to equity and integrity. It provides a means for educators to share valuable learning resources securely, while instilling a sense of responsibility and community ethics among students.
+5. **Privacy and Data Protection:** With a strong emphasis on privacy, IntegriMark ensures compliance with data privacy laws, respecting the confidentiality of student information.
+
+In summary, IntegriMark is more than a document security tool; it's a comprehensive solution addressing deeper educational challenges related to equity, integrity, and privacy. It empowers educators to share valuable resources securely, fostering a responsible and equitable academic environment.
